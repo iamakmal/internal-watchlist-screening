@@ -1,8 +1,9 @@
 import { useRef, useState } from "react";
 import Modal from "./Modal";
 import { FileUp } from "lucide-react";
-import { AWS_API_GATEWAY_URL } from "@/types/commonTypes";
+import { AWS_API_GATEWAY_URL, ValidationIssue } from "@/types/commonTypes";
 import ReportCard from "./ReportCard";
+import IssuesAccordion from "./IssuesAccordion";
 
 interface Props {
   isOpen: boolean;
@@ -13,16 +14,17 @@ interface SummaryReport {
   metadata: { report_date: string };
   summary: {
     total_rows: number;
+    parsed_rows: number;
     loaded_rows: number;
+    skipped_rows: number;
     failed_rows: number;
     unique_entities: number;
     subjects_with_multiple_rows: number;
-    subjects_with_warnings: number;
-    warnings_count: number;
   };
+  issues: [ValidationIssue];
 }
 
-const fmt = (n: number) => n.toLocaleString();
+const format = (n: number) => n.toLocaleString();
 
 export default function AddFileModal({ isOpen, onClose }: Props) {
   const fileRef = useRef<HTMLInputElement>(null);
@@ -116,7 +118,8 @@ export default function AddFileModal({ isOpen, onClose }: Props) {
     onClose();
   }
 
-  const s = report?.summary;
+  const summary = report?.summary;
+  const issues = report?.issues;
 
   return (
     <Modal isOpen={isOpen} onClose={handleClose} title="Upload watchlist">
@@ -173,43 +176,52 @@ export default function AddFileModal({ isOpen, onClose }: Props) {
         </button>
       </div>
 
-      {report && s && (
+      {report && summary && (
         <div className="mt-6 border-t border-gray-500 pt-6">
-          <h3 className="mb-3 text-sm font-semibold text-gray-900">
-            Import report
-          </h3>
+          <h3 className="mb-3 font-semibold text-gray-900">Summary Report</h3>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             <ReportCard
               title="Report Date"
               data={report.metadata.report_date?.replaceAll("-", " ")}
             />
-            <ReportCard title="Total Rows" data={fmt(s.total_rows)} />
+            <ReportCard title="Total Rows" data={format(summary.total_rows)} />
+            <ReportCard
+              title="Parsed Rows"
+              data={format(summary.parsed_rows)}
+              tone="success"
+            />
             <ReportCard
               title="Loaded Rows"
-              data={fmt(s.loaded_rows)}
+              data={format(summary.loaded_rows)}
               tone="success"
             />
             <ReportCard
               title="Failed Rows"
-              data={fmt(s.failed_rows)}
-              tone={s.failed_rows > 0 ? "danger" : "success"}
+              data={format(summary.failed_rows)}
+              tone={summary.failed_rows > 0 ? "danger" : "success"}
             />
-            <ReportCard title="Unique Entities" data={fmt(s.unique_entities)} />
+            <ReportCard
+              title="Skipped Rows"
+              data={format(summary.skipped_rows)}
+              tone={summary.skipped_rows > 0 ? "warning" : "success"}
+            />
+            <ReportCard
+              title="Unique Entities"
+              data={format(summary.unique_entities)}
+            />
             <ReportCard
               title="Subjects With Multiple Rows"
-              data={fmt(s.subjects_with_multiple_rows)}
-            />
-            <ReportCard
-              title="Subjects with Warnings"
-              data={fmt(s.subjects_with_warnings)}
-              tone={s.subjects_with_warnings > 0 ? "warning" : "success"}
-            />
-            <ReportCard
-              title="Warnings Count"
-              data={fmt(s.warnings_count)}
-              tone={s.warnings_count > 0 ? "warning" : "success"}
+              data={format(summary.subjects_with_multiple_rows)}
             />
           </div>
+        </div>
+      )}
+      {report && issues && issues.length > 0 && (
+        <div className="mt-6">
+          <h3 className="mb-3 font-semibold text-gray-900">
+            Issues Identified
+          </h3>
+          <IssuesAccordion issues={issues} />
         </div>
       )}
     </Modal>
