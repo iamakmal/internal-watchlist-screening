@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import Modal from "./Modal";
 import { FileUp } from "lucide-react";
-import { AWS_API_GATEWAY_URL, ValidationIssue } from "@/types/commonTypes";
+import { ValidationIssue } from "@/types/commonTypes";
 import ReportCard from "./ReportCard";
 import IssuesAccordion from "./IssuesAccordion";
 
@@ -65,40 +65,22 @@ export default function AddFileModal({ isOpen, onClose }: Props) {
 
     setLoading(true);
     setReport(null);
-    setStatus(`Uploading ${selectedFile.name}...`);
 
     try {
-      // 1. Get presigned URL
-      const urlRes = await fetch(AWS_API_GATEWAY_URL, {
+      setStatus(`Uploading and validating ${selectedFile.name}...`);
+      const formData = new FormData();
+      formData.append("file", selectedFile);
+      const res = await fetch("/api/upload-watchlist", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "get-upload-url" }),
+        body: formData,
       });
-      if (!urlRes.ok)
-        throw new Error(`Could not get Upload URL (${urlRes.status})`);
-      const { upload_url } = await urlRes.json();
-
-      // 2. Upload to S3
-      const putRes = await fetch(upload_url, {
-        method: "PUT",
-        headers: { "Content-Type": "text/csv" },
-        body: selectedFile,
-      });
-      if (!putRes.ok) throw new Error(`S3 upload failed (${putRes.status})`);
-
-      // 3. Validate
-      setStatus("Validating...");
-      const validateRes = await fetch(AWS_API_GATEWAY_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "validate" }),
-      });
-      if (!validateRes.ok)
-        throw new Error(`Validation failed (${validateRes.status})`);
-
-      const reportData: SummaryReport = await validateRes.json();
+      if (!res.ok) {
+        const { error } = await res.json().catch(() => ({ error: null }));
+        throw new Error(error ?? `Request failed (${res.status})`);
+      }
+      const reportData: SummaryReport = await res.json();
       setReport(reportData);
-      setStatus(`${selectedFile.name} uploaded successfully.`);
+      setStatus(`${selectedFile.name} uploaded successfully`);
     } catch (err) {
       console.error(err);
       setStatus("Upload failed. Check the file and try again.");
