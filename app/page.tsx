@@ -40,6 +40,51 @@ function scoreStyle(score: number) {
   };
 }
 
+function dobStatusStyle(status: string) {
+  switch (status) {
+    case "MATCH":
+      return {
+        label: "Exact match",
+        className: "bg-emerald-50 text-emerald-700 ring-emerald-600/20",
+      };
+    case "PARTIAL_MATCH":
+      return {
+        label: "Partial match",
+        className: "bg-amber-50 text-amber-700 ring-amber-600/20",
+      };
+    case "NEAR_MATCH":
+      return {
+        label: "Near match",
+        className: "bg-orange-50 text-orange-700 ring-orange-600/20",
+      };
+    case "NO_MATCH":
+      return {
+        label: "No match",
+        className: "bg-rose-50 text-rose-700 ring-rose-600/20",
+      };
+    case "NOT_PROVIDED":
+      return {
+        label: "Not provided",
+        className: "bg-slate-100 text-slate-700 ring-slate-500/20",
+      };
+    case "INVALID_INPUT":
+      return {
+        label: "Invalid input",
+        className: "bg-rose-50 text-rose-700 ring-rose-600/20",
+      };
+    case "NOT_AVAILABLE":
+      return {
+        label: "Not available",
+        className: "bg-slate-100 text-slate-700 ring-slate-500/20",
+      };
+    default:
+      return {
+        label: status || "Not available",
+        className: "bg-slate-100 text-slate-700 ring-slate-500/20",
+      };
+  }
+}
+
 function displayList(values: string[]) {
   return values.length > 0 ? values.join(", ") : "Not available";
 }
@@ -47,6 +92,7 @@ function displayList(values: string[]) {
 function MatchCard({ match }: { match: Match }) {
   const score = Math.max(0, Math.min(100, match.final_score));
   const style = scoreStyle(score);
+  const dobStatus = dobStatusStyle(match.dob_status);
 
   return (
     <article className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg">
@@ -104,9 +150,13 @@ function MatchCard({ match }: { match: Match }) {
             <CalendarDays className="h-4 w-4 text-indigo-500" />
             {displayList(match.date_of_birth)}
           </p>
-          <p className="mt-1 text-xs text-slate-500">
-            Status: {match.dob_status || "Not available"}
-          </p>
+          <div className="mt-2">
+            <span
+              className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ring-1 ring-inset ${dobStatus.className}`}
+            >
+              {dobStatus.label}
+            </span>
+          </div>
         </div>
         <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-4">
           <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
@@ -201,7 +251,7 @@ export default function Home() {
         body: JSON.stringify({
           action: "search",
           name,
-          date,
+          dob: date,
           minimum_score: threshold,
         }),
       });
@@ -280,9 +330,14 @@ export default function Home() {
             <label className="flex items-center gap-2">
               <span className="font-medium text-slate-600">Date of birth</span>
               <input
-                type="date"
+                type="text"
                 value={date}
-                onChange={(e) => setDate(e.target.value)}
+                onChange={(e) =>
+                  setDate(e.target.value.replace(/[^\d/\-]/g, "").slice(0, 10))
+                }
+                placeholder="DD/MM/YYYY"
+                maxLength={10}
+                aria-label="Date of birth (DD/MM/YYYY)"
                 className="rounded-md border border-slate-200 bg-white px-2 py-1 text-slate-700"
               />
             </label>
