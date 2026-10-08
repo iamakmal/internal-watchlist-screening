@@ -30,3 +30,35 @@ export interface SearchResult {
   matches_found: number;
   matches: Match[];
 }
+
+export interface BatchScreenResult {
+  row: number;
+  reference_id: string;
+  input: {
+    name: string;
+    normalized_name: string;
+    date_of_birth: string;
+  };
+  matches_found: number;
+  matches: Match[];
+}
+
+export interface BatchScreenError {
+  row: number;
+  reference_id: string;
+  code: string;
+  message: string;
+}
+
+export interface BatchScreenResponse {
+  summary: {
+    total_rows: number;
+    screened_rows: number;
+    failed_rows: number;
+    rows_with_matches: number;
+    rows_without_matches: number;
+    minimum_score: number;
+  };
+  results: BatchScreenResult[];
+  errors: BatchScreenError[];
+}

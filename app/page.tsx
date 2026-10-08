@@ -1,6 +1,7 @@
 "use client";
 
 import AddFileModal from "@/components/AddFileModal";
+import Sidebar from "@/components/Sidebar";
 import { SearchResult, Match } from "@/types/commonTypes";
 import {
   CalendarDays,
@@ -265,8 +266,10 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top_right,#e0e7ff,transparent_34%),#f8fafc]">
-      <div className="mx-auto max-w-5xl px-5 py-8 sm:px-8 sm:py-12">
+    <main className="flex min-h-screen flex-col bg-[radial-gradient(circle_at_top_right,#e0e7ff,transparent_34%),#f8fafc] lg:flex-row">
+      <Sidebar />
+      <div className="flex-1">
+        <div className="mx-auto max-w-5xl px-5 py-8 sm:px-8 sm:py-12">
         <header className="flex flex-col justify-between gap-6 sm:flex-row sm:items-start">
           <div>
             <div className="flex items-center gap-2 text-indigo-600">
@@ -442,6 +445,7 @@ export default function Home() {
             </p>
           </div>
         )}
+        </div>
       </div>
 
       <AddFileModal
