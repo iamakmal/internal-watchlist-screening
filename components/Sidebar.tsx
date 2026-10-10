@@ -2,7 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { FileSearch, ListChecks, ShieldAlert } from "lucide-react";
+import {
+  ClipboardCheck,
+  FileSearch,
+  ListChecks,
+  ShieldAlert,
+} from "lucide-react";
 
 const navigation = [
   {
@@ -14,8 +19,14 @@ const navigation = [
   {
     href: "/batch-screen",
     label: "Batch screening",
-    description: "Screen a CSV file",
+    description: "Screen multiple subjects",
     icon: ListChecks,
+  },
+  {
+    href: "/evaluate",
+    label: "Evaluate results",
+    description: "Measure screening quality",
+    icon: ClipboardCheck,
   },
 ];
 

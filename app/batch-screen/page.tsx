@@ -8,6 +8,7 @@ import {
   FileUp,
   Fingerprint,
   ShieldAlert,
+  Tag,
   Upload,
   XCircle,
 } from "lucide-react";
@@ -62,7 +63,7 @@ function MatchSummary({ match }: { match: Match }) {
         </span>
       </div>
 
-      <div className="mt-4 grid gap-3 text-sm sm:grid-cols-3">
+      <div className="m-4 grid gap-3 text-sm sm:grid-cols-3">
         <div>
           <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
             Date of birth
@@ -92,7 +93,30 @@ function MatchSummary({ match }: { match: Match }) {
           </p>
         </div>
       </div>
-
+      <div className="border-t border-slate-100 px-5 py-4 sm:px-6">
+        <div className="flex items-start gap-3">
+          <Tag className="mt-0.5 h-4 w-4 shrink-0 text-indigo-500" />
+          <div className="min-w-0">
+            <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+              Regimes
+            </p>
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {match.regime_names.length > 0 ? (
+                match.regime_names.map((regime) => (
+                  <span
+                    key={regime}
+                    className="rounded-md bg-indigo-50 px-2 py-1 text-xs font-medium text-indigo-700"
+                  >
+                    {regime}
+                  </span>
+                ))
+              ) : (
+                <span className="text-sm text-slate-500">Not available</span>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
       {match.reasons.length > 0 && (
         <ul className="mt-4 space-y-1 border-t border-slate-100 pt-3">
           {match.reasons.map((reason) => (
@@ -299,38 +323,6 @@ export default function BatchScreen() {
 
               <div>
                 <h2 className="mb-4 text-xl font-bold text-slate-950">
-                  Errors
-                </h2>
-                {report.errors.length === 0 ? (
-                  <div className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-                    <CheckCircle2 className="h-5 w-5" />
-                    No errors were reported.
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {report.errors.map((error) => (
-                      <article
-                        key={`${error.row}-${error.reference_id}`}
-                        className="flex gap-3 rounded-xl border border-rose-200 bg-rose-50 p-4 text-rose-950"
-                      >
-                        <XCircle className="mt-0.5 h-5 w-5 shrink-0 text-rose-600" />
-                        <div className="min-w-0 text-sm">
-                          <p className="font-semibold">
-                            Row {error.row} · {error.reference_id}
-                          </p>
-                          <p className="mt-1">{error.message}</p>
-                          <code className="mt-2 block text-xs text-rose-700">
-                            {error.code}
-                          </code>
-                        </div>
-                      </article>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              <div>
-                <h2 className="mb-4 text-xl font-bold text-slate-950">
                   Match responses
                 </h2>
                 {report.results.length === 0 ? (
@@ -380,6 +372,38 @@ export default function BatchScreen() {
                           </div>
                         )}
                       </section>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <h2 className="mb-4 text-xl font-bold text-slate-950">
+                  Errors
+                </h2>
+                {report.errors.length === 0 ? (
+                  <div className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+                    <CheckCircle2 className="h-5 w-5" />
+                    No errors were reported.
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {report.errors.map((error) => (
+                      <article
+                        key={`${error.row}-${error.reference_id}`}
+                        className="flex gap-3 rounded-xl border border-rose-200 bg-rose-50 p-4 text-rose-950"
+                      >
+                        <XCircle className="mt-0.5 h-5 w-5 shrink-0 text-rose-600" />
+                        <div className="min-w-0 text-sm">
+                          <p className="font-semibold">
+                            Row {error.row} · {error.reference_id}
+                          </p>
+                          <p className="mt-1">{error.message}</p>
+                          <code className="mt-2 block text-xs text-rose-700">
+                            {error.code}
+                          </code>
+                        </div>
+                      </article>
                     ))}
                   </div>
                 )}
