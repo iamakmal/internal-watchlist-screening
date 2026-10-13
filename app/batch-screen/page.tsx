@@ -5,6 +5,7 @@ import {
   AlertCircle,
   CheckCircle2,
   FileUp,
+  LoaderCircle,
   ShieldAlert,
   Upload,
   XCircle,
@@ -42,6 +43,7 @@ export default function BatchScreen() {
   function handleDrop(event: React.DragEvent<HTMLDivElement>) {
     event.preventDefault();
     setDragging(false);
+    if (loading) return;
     const file = event.dataTransfer.files?.[0];
     if (file) selectFile(file);
   }
@@ -104,21 +106,31 @@ export default function BatchScreen() {
 
           <section className="mt-8 rounded-2xl border border-indigo-100 bg-white/90 p-4 shadow-xl shadow-indigo-100/40 backdrop-blur sm:p-6">
             <div
-              onClick={() => fileRef.current?.click()}
+              onClick={() => {
+                if (!loading) fileRef.current?.click();
+              }}
               onDragOver={(event) => {
                 event.preventDefault();
                 setDragging(true);
               }}
               onDragLeave={() => setDragging(false)}
               onDrop={handleDrop}
-              className={`flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed px-6 py-12 text-center transition ${
+              aria-busy={loading}
+              className={`flex flex-col items-center justify-center rounded-2xl border-2 border-dashed px-6 py-12 text-center transition ${
                 dragging
                   ? "border-indigo-500 bg-indigo-50"
                   : "border-slate-300 bg-slate-50/60 hover:border-indigo-300 hover:bg-indigo-50/50"
-              }`}
+              } ${loading ? "cursor-not-allowed opacity-70" : "cursor-pointer"}`}
             >
               <div className="flex h-16 w-16 items-center justify-center rounded-full bg-indigo-100">
-                <FileUp className="h-8 w-8 text-indigo-600" />
+                {loading ? (
+                  <LoaderCircle
+                    aria-hidden="true"
+                    className="h-8 w-8 animate-spin text-indigo-600"
+                  />
+                ) : (
+                  <FileUp className="h-8 w-8 text-indigo-600" />
+                )}
               </div>
               <p className="mt-4 text-sm font-semibold text-slate-900">
                 {selectedFile
@@ -159,10 +171,18 @@ export default function BatchScreen() {
               <button
                 type="button"
                 disabled={loading || !selectedFile}
+                aria-busy={loading}
                 onClick={handleUpload}
                 className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-200 transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                <Upload className="h-4 w-4" />
+                {loading ? (
+                  <LoaderCircle
+                    aria-hidden="true"
+                    className="h-4 w-4 animate-spin"
+                  />
+                ) : (
+                  <Upload className="h-4 w-4" />
+                )}
                 {loading ? "Screening..." : "Upload and screen"}
               </button>
             </div>

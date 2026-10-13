@@ -8,6 +8,7 @@ import {
   CheckCircle2,
   CircleAlert,
   Database,
+  LoaderCircle,
   RotateCcw,
   Search,
   ShieldAlert,
@@ -125,8 +126,15 @@ export default function Home() {
               <button
                 type="submit"
                 disabled={loading || !name.trim()}
+                aria-busy={loading}
                 className="rounded-xl bg-indigo-600 px-7 py-3.5 font-semibold text-white shadow-lg shadow-indigo-200 transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
               >
+                {loading && (
+                  <LoaderCircle
+                    aria-hidden="true"
+                    className="mr-2 inline-block h-4 w-4 animate-spin align-[-0.15em]"
+                  />
+                )}
                 {loading ? "Searching..." : "Search records"}
               </button>
             </form>

@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import Modal from "./Modal";
-import { FileUp } from "lucide-react";
+import { FileUp, LoaderCircle } from "lucide-react";
 import { ValidationIssue } from "@/types/commonTypes";
 import ReportCard from "./ReportCard";
 import IssuesAccordion from "./IssuesAccordion";
@@ -48,6 +48,7 @@ export default function AddFileModal({ isOpen, onClose }: Props) {
   function handleDrop(e: React.DragEvent) {
     e.preventDefault();
     setDragging(false);
+    if (loading) return;
     const file = e.dataTransfer.files?.[0];
     if (file && file.name.toLowerCase().endsWith(".csv")) {
       selectFile(file);
@@ -105,21 +106,32 @@ export default function AddFileModal({ isOpen, onClose }: Props) {
   return (
     <Modal isOpen={isOpen} onClose={handleClose} title="Upload watchlist">
       <div
-        onClick={() => fileRef.current?.click()}
+        onClick={() => {
+          if (!loading) fileRef.current?.click();
+        }}
         onDragOver={(e) => {
           e.preventDefault();
           setDragging(true);
         }}
         onDragLeave={() => setDragging(false)}
         onDrop={handleDrop}
-        className={`flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed px-6 py-10 text-center transition ${
-          dragging
-            ? "border-indigo-500 bg-indigo-50"
-            : "border-gray-300 hover:border-gray-400 hover:bg-gray-50"
-        }`}
+        aria-busy={loading}
+        className={`flex flex-col items-center justify-center rounded-2xl border-2 border-dashed px-6 py-10 text-center transition ${
+        dragging
+          ? "border-indigo-500 bg-indigo-50"
+          : "border-gray-300 hover:border-gray-400 hover:bg-gray-50"
+        } ${loading ? "cursor-not-allowed opacity-70" : "cursor-pointer"}`}
       >
         <div className="flex h-16 w-16 items-center justify-center rounded-full bg-indigo-50">
-          <FileUp size={32} className="text-indigo-500" />
+          {loading ? (
+            <LoaderCircle
+              size={32}
+              aria-hidden="true"
+              className="animate-spin text-indigo-500"
+            />
+          ) : (
+            <FileUp size={32} className="text-indigo-500" />
+          )}
         </div>
         <p className="mt-3 text-sm font-medium text-gray-900">
           {selectedFile
@@ -150,9 +162,17 @@ export default function AddFileModal({ isOpen, onClose }: Props) {
         <button
           type="button"
           disabled={loading || !selectedFile}
+          aria-busy={loading}
           onClick={handleUpload}
           className="rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50"
         >
+          {loading && (
+            <LoaderCircle
+              size={16}
+              aria-hidden="true"
+              className="animate-spin"
+            />
+          )}
           {loading ? "Uploading..." : "Upload"}
         </button>
       </div>
