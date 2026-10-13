@@ -31,11 +31,13 @@ export default function AddFileModal({ isOpen, onClose }: Props) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [report, setReport] = useState<SummaryReport | null>(null);
   const [status, setStatus] = useState("");
+  const [statusIsError, setStatusIsError] = useState(false);
   const [loading, setLoading] = useState(false);
   const [dragging, setDragging] = useState(false);
 
   function selectFile(file: File) {
     setSelectedFile(file);
+    setStatusIsError(false);
     setStatus("");
     setReport(null);
   }
@@ -53,18 +55,21 @@ export default function AddFileModal({ isOpen, onClose }: Props) {
     if (file && file.name.toLowerCase().endsWith(".csv")) {
       selectFile(file);
     } else {
+      setStatusIsError(true);
       setStatus("Please drop a .csv file.");
     }
   }
 
   async function handleUpload() {
     if (!selectedFile) {
+      setStatusIsError(true);
       setStatus("Please select a CSV file first.");
       return;
     }
 
     setLoading(true);
     setReport(null);
+    setStatusIsError(false);
 
     try {
       setStatus(`Uploading and validating ${selectedFile.name}...`);
@@ -83,6 +88,7 @@ export default function AddFileModal({ isOpen, onClose }: Props) {
       setStatus(`${selectedFile.name} uploaded successfully`);
     } catch (error) {
       console.error(error);
+      setStatusIsError(true);
       setStatus(
         error instanceof Error
           ? error.message
@@ -98,6 +104,7 @@ export default function AddFileModal({ isOpen, onClose }: Props) {
     if (loading) return;
     setSelectedFile(null);
     setReport(null);
+    setStatusIsError(false);
     setStatus("");
     setDragging(false);
     if (fileRef.current) fileRef.current.value = "";
@@ -152,7 +159,15 @@ export default function AddFileModal({ isOpen, onClose }: Props) {
         />
       </div>
 
-      {status && <p className="mt-3 text-sm text-gray-600">{status}</p>}
+      {status && (
+        <p
+          className={`mt-3 text-sm ${
+            statusIsError ? "text-rose-600" : "text-gray-600"
+          }`}
+        >
+          {status}
+        </p>
+      )}
 
       <div className="mt-4 flex justify-end gap-2">
         <button

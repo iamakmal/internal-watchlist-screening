@@ -45,17 +45,20 @@ export default function EvaluatePage() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [report, setReport] = useState<EvaluationResponse | null>(null);
   const [status, setStatus] = useState("");
+  const [statusIsError, setStatusIsError] = useState(false);
   const [loading, setLoading] = useState(false);
   const [dragging, setDragging] = useState(false);
   const [threshold, setThreshold] = useState(80);
 
   function selectFile(file: File) {
     if (!file.name.toLowerCase().endsWith(".csv")) {
+      setStatusIsError(true);
       setStatus("Please select a .csv file.");
       return;
     }
     setSelectedFile(file);
     setReport(null);
+    setStatusIsError(false);
     setStatus("");
   }
 
@@ -74,11 +77,13 @@ export default function EvaluatePage() {
 
   async function handleEvaluate() {
     if (!selectedFile) {
+      setStatusIsError(true);
       setStatus("Please select a CSV file first.");
       return;
     }
     setLoading(true);
     setReport(null);
+    setStatusIsError(false);
     setStatus(`Uploading and evaluating ${selectedFile.name}...`);
     try {
       const formData = new FormData();
@@ -96,6 +101,7 @@ export default function EvaluatePage() {
       setStatus(`${selectedFile.name} evaluated successfully.`);
     } catch (error) {
       console.error("Evaluation failed:", error);
+      setStatusIsError(true);
       setStatus(
         error instanceof Error
           ? error.message
@@ -170,7 +176,15 @@ export default function EvaluatePage() {
                 className="hidden"
               />
             </div>
-            {status && <p className="mt-3 text-sm text-slate-600">{status}</p>}
+            {status && (
+              <p
+                className={`mt-3 text-sm ${
+                  statusIsError ? "text-rose-600" : "text-slate-600"
+                }`}
+              >
+                {status}
+              </p>
+            )}
             <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <label className="flex items-center gap-3 text-xs text-slate-500">
                 <span className="font-medium text-slate-600">
