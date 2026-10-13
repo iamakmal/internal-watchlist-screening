@@ -632,3 +632,12 @@ Tests cover:
 # Screenshots
 
 Some images of the application
+<img width="1870" height="851" alt="single" src="https://github.com/user-attachments/assets/c2af5382-f451-46d0-881b-18fabe91d2e3" />
+<img width="1881" height="832" alt="upload2" src="https://github.com/user-attachments/assets/8eef9345-fc70-4a7d-bd78-a6e7350df064" />
+<img width="1865" height="855" alt="upload" src="https://github.com/user-attachments/assets/fe7f1225-ac4d-4bec-b4cc-ae3bd8c509fa" />
+<img width="1863" height="703" alt="batch1" src="https://github.com/user-attachments/assets/f0dcc692-2c79-43f8-95b4-a742b7b26eea" />
+<img width="1873" height="852" alt="batch2" src="https://github.com/user-attachments/assets/9ab9a51d-bf16-4017-9c33-80ddbf7c8b90" />
+<img width="1872" height="852" alt="evaluate1" src="https://github.com/user-attachments/assets/4347e664-b5a0-4af5-bf0f-b73ce92a96f8" />
+<img width="1853" height="851" alt="evaluate2" src="https://github.com/user-attachments/assets/a09edbc9-8d9e-4be4-bfd2-63f1bde13832" />
+
+
