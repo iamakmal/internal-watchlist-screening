@@ -8,8 +8,12 @@ async function callGateway(action: "get-upload-url" | "validate") {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ action }),
   });
-  if (!res.ok) throw new Error(`Gateway "${action}" failed (${res.status})`);
-  return res.json();
+  const result = await res.json();
+  if (!res.ok)
+    throw new Error(
+      result?.error ?? `Gateway "${action}" failed (${res.status})`,
+    );
+  return result;
 }
 
 export async function POST(request: Request) {
@@ -50,10 +54,13 @@ export async function POST(request: Request) {
 
     return NextResponse.json(report);
   } catch (error) {
-    console.error("Upload pipeline failed:", error);
-    return NextResponse.json(
-      { error: "Upload or validation failed. Please try again." },
-      { status: 502 },
-    );
+    console.error("Uploading watchlist failed:", error);
+
+    const message =
+      error instanceof Error
+        ? error.message
+        : "Uploading watchlist failed. Please try again.";
+
+    return NextResponse.json({ error: message }, { status: 502 });
   }
 }

@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 const API_GATEWAY_URL = process.env.AWS_API_GATEWAY_URL;
 
 async function callGateway(
-  action: "get-batch-upload-url" | "batch-search",
+  action: "get-batch-upload-url" | "batch-screen",
   data: Record<string, unknown> = {},
 ) {
   const res = await fetch(API_GATEWAY_URL!, {
@@ -11,8 +11,12 @@ async function callGateway(
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ action, ...data }),
   });
-  if (!res.ok) throw new Error(`Gateway "${action}" failed (${res.status})`);
-  return res.json();
+  const result = await res.json();
+  if (!res.ok)
+    throw new Error(
+      result?.error ?? `Gateway "${action}" failed (${res.status})`,
+    );
+  return result;
 }
 
 export async function POST(request: Request) {
@@ -62,17 +66,20 @@ export async function POST(request: Request) {
     if (!putRes.ok) throw new Error(`S3 upload failed (${putRes.status})`);
 
     // 3. Batch search
-    const report = await callGateway("batch-search", {
+    const report = await callGateway("batch-screen", {
       file_key,
       minimum_score: minimumScore,
     });
 
     return NextResponse.json(report);
   } catch (error) {
-    console.error("Upload pipeline failed:", error);
-    return NextResponse.json(
-      { error: "Upload or validation failed. Please try again." },
-      { status: 502 },
-    );
+    console.error("Batch screening failed:", error);
+
+    const message =
+      error instanceof Error
+        ? error.message
+        : "Batch screening failed. Please try again.";
+
+    return NextResponse.json({ error: message }, { status: 502 });
   }
 }

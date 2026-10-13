@@ -4,6 +4,7 @@ import { FileUp } from "lucide-react";
 import { ValidationIssue } from "@/types/commonTypes";
 import ReportCard from "./ReportCard";
 import IssuesAccordion from "./IssuesAccordion";
+import { format } from "@/app/lib/commonUtils";
 
 interface Props {
   isOpen: boolean;
@@ -21,10 +22,8 @@ interface SummaryReport {
     unique_entities: number;
     subjects_with_multiple_rows: number;
   };
-  issues: [ValidationIssue];
+  issues: ValidationIssue[];
 }
-
-const format = (n: number) => n.toLocaleString();
 
 export default function AddFileModal({ isOpen, onClose }: Props) {
   const fileRef = useRef<HTMLInputElement>(null);
