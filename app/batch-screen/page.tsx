@@ -76,7 +76,11 @@ export default function BatchScreen() {
       setStatus(`${selectedFile.name} screened successfully.`);
     } catch (error) {
       console.error("Batch screening failed:", error);
-      setStatus("Batch screening failed. Check the file and try again.");
+      setStatus(
+        error instanceof Error
+          ? error.message
+          : "Batch screening failed. Check the file and try again.",
+      );
     } finally {
       setLoading(false);
       if (fileRef.current) fileRef.current.value = "";

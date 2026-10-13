@@ -81,9 +81,13 @@ export default function AddFileModal({ isOpen, onClose }: Props) {
       const reportData: SummaryReport = await res.json();
       setReport(reportData);
       setStatus(`${selectedFile.name} uploaded successfully`);
-    } catch (err) {
-      console.error(err);
-      setStatus("Upload failed. Check the file and try again.");
+    } catch (error) {
+      console.error(error);
+      setStatus(
+        error instanceof Error
+          ? error.message
+          : "Upload failed. Check the file and try again.",
+      );
     } finally {
       setLoading(false);
       if (fileRef.current) fileRef.current.value = "";
@@ -117,9 +121,9 @@ export default function AddFileModal({ isOpen, onClose }: Props) {
         onDrop={handleDrop}
         aria-busy={loading}
         className={`flex flex-col items-center justify-center rounded-2xl border-2 border-dashed px-6 py-10 text-center transition ${
-        dragging
-          ? "border-indigo-500 bg-indigo-50"
-          : "border-gray-300 hover:border-gray-400 hover:bg-gray-50"
+          dragging
+            ? "border-indigo-500 bg-indigo-50"
+            : "border-gray-300 hover:border-gray-400 hover:bg-gray-50"
         } ${loading ? "cursor-not-allowed opacity-70" : "cursor-pointer"}`}
       >
         <div className="flex h-16 w-16 items-center justify-center rounded-full bg-indigo-50">

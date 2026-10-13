@@ -96,7 +96,11 @@ export default function EvaluatePage() {
       setStatus(`${selectedFile.name} evaluated successfully.`);
     } catch (error) {
       console.error("Evaluation failed:", error);
-      setStatus("Evaluation failed. Check the file and try again.");
+      setStatus(
+        error instanceof Error
+          ? error.message
+          : "Evaluation failed. Check the file and try again.",
+      );
     } finally {
       setLoading(false);
       if (fileRef.current) fileRef.current.value = "";
