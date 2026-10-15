@@ -47,7 +47,7 @@ export default function MatchCard({ match }: props) {
                 {match.designation_type}
               </span>
             </div>
-            <h3 className="truncate text-xl font-semibold tracking-tight text-slate-950">
+            <h3 className="text-xl font-semibold tracking-tight text-slate-950">
               {match.matched_name}
             </h3>
             <p className="mt-1 text-sm text-slate-500">
