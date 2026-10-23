@@ -63,3 +63,19 @@ export const confirmSignupSchema = z.object({
 export const resendConfirmationSchema = confirmSignupSchema.pick({
   email: true,
 });
+
+export const forgotPasswordSchema = z.object({
+  email: confirmSignupSchema.shape.email,
+});
+
+export const resetPasswordSchema = z
+  .object({
+    email: confirmSignupSchema.shape.email,
+    code: confirmSignupSchema.shape.code,
+    newPassword: signupFields.password,
+    confirmPassword: z.string().min(1, "Confirm your password"),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    path: ["confirmPassword"],
+    message: "Passwords do not match",
+  });
