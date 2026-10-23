@@ -1,4 +1,5 @@
 import { cognito } from "@/app/lib/cognito";
+import { loginSchema } from "@/app/lib/validation";
 import { InitiateAuthCommand } from "@aws-sdk/client-cognito-identity-provider";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -10,34 +11,28 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const { email, password } = await request.json();
-
-    if (
-      typeof email !== "string" ||
-      typeof password !== "string" ||
-      !email ||
-      !password ||
-      email.length > 254 ||
-      password.length > 1024
-    ) {
+    const parsedResult = loginSchema.safeParse(await request.json());
+    if (!parsedResult.success) {
       return NextResponse.json(
-        { error: "Invalid credentials" },
+        {
+          error: parsedResult.error.issues[0]?.message ?? "Invalid credentials",
+        },
         { status: 400 },
       );
     }
 
-    const result = await cognito.send(
+    const authResult = await cognito.send(
       new InitiateAuthCommand({
         AuthFlow: "USER_PASSWORD_AUTH",
         ClientId: process.env.COGNITO_CLIENT_ID!,
         AuthParameters: {
-          USERNAME: email.trim().toLowerCase(),
-          PASSWORD: password,
+          USERNAME: parsedResult.data.email,
+          PASSWORD: parsedResult.data.password,
         },
       }),
     );
 
-    const auth = result.AuthenticationResult;
+    const auth = authResult.AuthenticationResult;
 
     if (!auth?.AccessToken || !auth.RefreshToken) {
       return NextResponse.json(
@@ -67,7 +62,43 @@ export async function POST(request: NextRequest) {
     });
 
     return response;
-  } catch {
-    return NextResponse.json({ error: "Login failed" }, { status: 401 });
+  } catch (error) {
+    const errorName = error instanceof Error ? error.name : "";
+    const errors: Record<string, { message: string; status: number }> = {
+      NotAuthorizedException: {
+        message: "Invalid email or password.",
+        status: 401,
+      },
+      UserNotFoundException: {
+        message: "Invalid email or password.",
+        status: 401,
+      },
+      UserNotConfirmedException: {
+        message: "Please confirm your email address before signing in.",
+        status: 403,
+      },
+      PasswordResetRequiredException: {
+        message: "You must reset your password before signing in.",
+        status: 403,
+      },
+      TooManyRequestsException: {
+        message: "Too many sign-in attempts. Please wait and try again.",
+        status: 429,
+      },
+      LimitExceededException: {
+        message: "Too many sign-in attempts. Please wait and try again.",
+        status: 429,
+      },
+    };
+    const mappedError = errors[errorName];
+
+    return NextResponse.json(
+      {
+        error:
+          mappedError?.message ??
+          "Unable to sign in right now. Please try again.",
+      },
+      { status: mappedError?.status ?? 500 },
+    );
   }
 }

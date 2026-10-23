@@ -3,17 +3,37 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { LoaderCircle, ShieldAlert } from "lucide-react";
+import Link from "next/link";
+import { loginSchema } from "@/app/lib/validation";
 
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
+  const [emailError, setEmailError] = useState<string | null>(null);
   const [password, setPassword] = useState("");
+  const [passwordError, setPasswordError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [notConfirmedEmail, setNotConfirmedEmail] = useState<string | null>(
+    null,
+  );
 
   async function handleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
+    setEmailError(null);
+    setPasswordError(null);
     setError(null);
+    setNotConfirmedEmail(null);
+
+    const result = loginSchema.safeParse({ email, password });
+    if (!result.success) {
+      for (const issue of result.error.issues) {
+        if (issue.path[0] === "email") setEmailError(issue.message);
+        if (issue.path[0] === "password") setPasswordError(issue.message);
+      }
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -22,13 +42,18 @@ export default function LoginPage() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          email,
-          password,
-        }),
+        body: JSON.stringify(result.data),
       });
+      const payload = await response.json().catch(() => null);
       if (!response.ok) {
-        setError("Invalid email or password.");
+        if (response.status === 403) {
+          setNotConfirmedEmail(result.data.email);
+        }
+        setError(
+          typeof payload?.error === "string"
+            ? payload.error
+            : "Unable to sign in right now. Please try again.",
+        );
         return;
       }
       router.push("/single-screen");
@@ -73,6 +98,7 @@ export default function LoginPage() {
               className="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
               placeholder="you@team.com"
             />
+            {emailError && <p className="text-sm text-red-600">{emailError}</p>}
           </div>
 
           <div>
@@ -91,9 +117,27 @@ export default function LoginPage() {
               className="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
               placeholder="••••••••"
             />
+            {passwordError && (
+              <p className="text-sm text-red-600">{passwordError}</p>
+            )}
           </div>
 
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          {error && (
+            <p role="alert" className="text-sm text-red-600">
+              {error}
+            </p>
+          )}
+          {notConfirmedEmail && (
+            <p className="text-sm text-center text-slate-600">
+              Already signed up but haven&apos;t verified your email?
+              <Link
+                href={`/confirm-signup?email=${encodeURIComponent(notConfirmedEmail)}`}
+                className="block text-sm font-medium text-blue-600 hover:underline"
+              >
+                Confirm your account
+              </Link>
+            </p>
+          )}
 
           <button
             type="submit"
@@ -109,6 +153,15 @@ export default function LoginPage() {
             {loading ? "Signing in..." : "Sign in"}
           </button>
         </form>
+        <div className="mt-6 text-center text-sm text-slate-600">
+          Don&apos;t have an account?{" "}
+          <Link
+            href="/signup"
+            className="font-medium text-blue-600 hover:underline"
+          >
+            Create one
+          </Link>
+        </div>
       </div>
     </div>
   );
