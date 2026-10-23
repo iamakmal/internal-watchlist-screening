@@ -5,6 +5,7 @@ import { ValidationIssue } from "@/types/commonTypes";
 import ReportCard from "./ReportCard";
 import IssuesAccordion from "./IssuesAccordion";
 import { format } from "@/app/lib/commonUtils";
+import { clientApi } from "@/app/lib/client-server-call";
 
 interface Props {
   isOpen: boolean;
@@ -75,7 +76,7 @@ export default function AddFileModal({ isOpen, onClose }: Props) {
       setStatus(`Uploading and validating ${selectedFile.name}...`);
       const formData = new FormData();
       formData.append("file", selectedFile);
-      const res = await fetch("/api/upload-watchlist", {
+      const res = await clientApi("/api/upload-watchlist", {
         method: "POST",
         body: formData,
       });

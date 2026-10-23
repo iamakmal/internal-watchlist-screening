@@ -15,7 +15,8 @@ import ReportCard from "@/components/ReportCard";
 import Sidebar from "@/components/Sidebar";
 import { EvaluationDetails, EvaluationResponse } from "@/types/commonTypes";
 import EvaluateResultMatch from "@/components/EvaluateResultMatch";
-import { format } from "../lib/commonUtils";
+import { format } from "../../lib/commonUtils";
+import { clientApi } from "../../lib/client-server-call";
 
 function evaluationStatusStyle(status: EvaluationDetails["status"]) {
   switch (status) {
@@ -40,7 +41,7 @@ function evaluationStatusLabel(status: EvaluationDetails["status"]) {
     .join(" ");
 }
 
-export default function EvaluatePage() {
+export default function EvaluateScreen() {
   const fileRef = useRef<HTMLInputElement>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [report, setReport] = useState<EvaluationResponse | null>(null);
@@ -89,7 +90,7 @@ export default function EvaluatePage() {
       const formData = new FormData();
       formData.append("file", selectedFile);
       formData.append("minimum_score", String(threshold));
-      const response = await fetch("/api/evaluate", {
+      const response = await clientApi("/api/evaluate", {
         method: "POST",
         body: formData,
       });

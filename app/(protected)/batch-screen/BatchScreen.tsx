@@ -13,8 +13,9 @@ import {
 import ReportCard from "@/components/ReportCard";
 import Sidebar from "@/components/Sidebar";
 import { BatchScreenResponse } from "@/types/commonTypes";
-import { format, formatDate } from "../lib/commonUtils";
-import MatchSummary from "@/components/MatchSummary";
+import { format, formatDate } from "../../lib/commonUtils";
+import MatchTable from "@/components/MatchTable";
+import { clientApi } from "../../lib/client-server-call";
 
 export default function BatchScreen() {
   const fileRef = useRef<HTMLInputElement>(null);
@@ -67,7 +68,7 @@ export default function BatchScreen() {
       const formData = new FormData();
       formData.append("file", selectedFile);
       formData.append("minimum_score", String(threshold));
-      const response = await fetch("/api/batch-screen", {
+      const response = await clientApi("/api/batch-screen", {
         method: "POST",
         body: formData,
       });
@@ -284,13 +285,8 @@ export default function BatchScreen() {
                             No potential matches found for this row.
                           </p>
                         ) : (
-                          <div className="mt-4 grid gap-4 lg:grid-cols-2">
-                            {result.matches.map((match) => (
-                              <MatchSummary
-                                key={`${result.row}-${match.unique_id}`}
-                                match={match}
-                              />
-                            ))}
+                          <div className="mt-4">
+                            <MatchTable matches={result.matches} />
                           </div>
                         )}
                       </section>

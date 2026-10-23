@@ -1,5 +1,5 @@
 import { EvaluationDetails, EvaluationResponse } from "@/types/commonTypes";
-import MatchSummary from "./MatchSummary";
+import MatchTable from "./MatchTable";
 
 interface props {
   detail: EvaluationDetails;
@@ -32,14 +32,7 @@ export default function EvaluateResultMatches({ detail, report }: props) {
       {result.matches.length === 0 ? (
         <p className="text-sm text-slate-500">No screening matches found.</p>
       ) : (
-        <div className="grid gap-4 lg:grid-cols-2">
-          {result.matches.map((match) => (
-            <MatchSummary
-              key={`${detail.row_number}-${match.unique_id}`}
-              match={match}
-            />
-          ))}
-        </div>
+        <MatchTable matches={result.matches} />
       )}
     </div>
   );
