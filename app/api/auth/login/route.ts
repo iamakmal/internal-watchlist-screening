@@ -1,4 +1,5 @@
 import { cognito } from "@/app/lib/cognito";
+import { ACCESS, accessOpts, REFRESH, refreshOpts } from "@/app/lib/cookies";
 import { loginSchema } from "@/app/lib/validation";
 import { InitiateAuthCommand } from "@aws-sdk/client-cognito-identity-provider";
 import { NextRequest, NextResponse } from "next/server";
@@ -45,21 +46,12 @@ export async function POST(request: NextRequest) {
       success: true,
     });
 
-    response.cookies.set("session", auth.AccessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      path: "/",
-      maxAge: auth.ExpiresIn ?? 900,
-    });
-
-    response.cookies.set("refresh_token", auth.RefreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      path: "/api/auth",
-      maxAge: 24 * 60 * 60,
-    });
+    response.cookies.set(
+      ACCESS,
+      auth.AccessToken,
+      accessOpts(auth.ExpiresIn ?? 900),
+    );
+    response.cookies.set(REFRESH, auth.RefreshToken, refreshOpts());
 
     return response;
   } catch (error) {

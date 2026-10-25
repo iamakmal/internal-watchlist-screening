@@ -1,4 +1,5 @@
 import { cognito } from "@/app/lib/cognito";
+import { ACCESS, accessOpts, REFRESH, refreshOpts } from "@/app/lib/cookies";
 import { RevokeTokenCommand } from "@aws-sdk/client-cognito-identity-provider";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -7,7 +8,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const refreshToken = request.cookies.get("refresh_token")?.value;
+  const refreshToken = request.cookies.get(REFRESH)?.value;
 
   let revoked = !refreshToken;
 
@@ -30,11 +31,8 @@ export async function POST(request: NextRequest) {
     revoked,
   });
 
-  response.cookies.delete("session");
-  response.cookies.set("refresh_token", "", {
-    path: "/api/auth",
-    maxAge: 0,
-  });
+  response.cookies.set(ACCESS, "", { ...accessOpts(), maxAge: 0 });
+  response.cookies.set(REFRESH, "", { ...refreshOpts(), maxAge: 0 });
 
   return response;
 }
