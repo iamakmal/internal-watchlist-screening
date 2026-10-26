@@ -11,7 +11,7 @@ export async function authenticatedApi<T>(
   }
 
   const token = await getAccessToken();
-  console.log("token", token);
+
   if (!token) {
     throw new ApiError(401, "Unauthorized");
   }
@@ -25,8 +25,6 @@ export async function authenticatedApi<T>(
     body: JSON.stringify(body),
     cache: "no-store",
   });
-
-  console.log("response", response);
 
   if (!response.ok) {
     const payload = await response.json().catch(() => null);

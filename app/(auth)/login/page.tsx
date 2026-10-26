@@ -1,13 +1,23 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { LoaderCircle, ShieldAlert } from "lucide-react";
 import Link from "next/link";
 import { loginSchema } from "@/app/lib/validation";
 
 export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginPageForm />
+    </Suspense>
+  );
+}
+
+function LoginPageForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get("next") || "/single-screen";
   const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState<string | null>(null);
   const [password, setPassword] = useState("");
@@ -56,7 +66,7 @@ export default function LoginPage() {
         );
         return;
       }
-      router.push("/single-screen");
+      router.push(redirectTo);
       router.refresh();
     } catch {
       setError("An error occurred while trying to sign in.");
