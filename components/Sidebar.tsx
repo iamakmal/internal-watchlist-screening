@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import {
   ClipboardCheck,
   FileSearch,
@@ -37,19 +37,24 @@ const navigation = [
 
 export default function Sidebar() {
   const { user, isAdmin } = useAuth();
-  const router = useRouter();
   const pathname = usePathname();
   const visibleNavigation = navigation.filter(
     (item) => !item.adminOnly || isAdmin,
   );
 
   async function handleLogout() {
-    const response = await fetch("/api/auth/logout", {
-      method: "POST",
-    });
-    if (response.ok) {
-      router.replace("/login");
-      router.refresh();
+    try {
+      const response = await fetch("/api/auth/logout", {
+        method: "POST",
+      });
+
+      if (!response.ok) {
+        throw new Error("Unable to sign out");
+      }
+
+      window.location.replace("/login");
+    } catch (error) {
+      console.error("Logout failed", error);
     }
   }
 
