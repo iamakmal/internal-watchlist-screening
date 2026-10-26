@@ -16,7 +16,17 @@ const protectedRoutes = [
   "/evaluate",
   "/api",
 ];
+
 const adminRoutes = ["/evaluate"];
+
+const authRoutes = [
+  "/login",
+  "/signup",
+  "/confirm-signup",
+  "/forgot-password",
+  "/reset-password",
+];
+
 const REFRESH_BEFORE_SECONDS = 30;
 
 const matches = (pathname: string, routes: string[]) =>
@@ -29,13 +39,12 @@ export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (pathname.startsWith("/api/auth/")) return NextResponse.next();
-  if (!matches(pathname, protectedRoutes)) return NextResponse.next();
 
-  const isApi = pathname.startsWith("/api/");
   const token = request.cookies.get(ACCESS)?.value;
   const refreshToken = request.cookies.get(REFRESH)?.value;
 
   let claims: Awaited<ReturnType<typeof verifier.verify>> | null = null;
+
   if (token) {
     try {
       claims = await verifier.verify(token);
@@ -43,6 +52,14 @@ export async function proxy(request: NextRequest) {
       claims = null;
     }
   }
+
+  if (claims && matches(pathname, authRoutes)) {
+    return NextResponse.redirect(new URL("/single-screen", request.url));
+  }
+
+  if (!matches(pathname, protectedRoutes)) return NextResponse.next();
+
+  const isApi = pathname.startsWith("/api/");
 
   const nearExpiry =
     !!claims &&
@@ -59,7 +76,8 @@ export async function proxy(request: NextRequest) {
       claims = await verifier.verify(next.accessToken);
       refreshed = next;
     } catch (e: unknown) {
-      refreshRejected = e instanceof Error && e.name === "NotAuthorizedException";
+      refreshRejected =
+        e instanceof Error && e.name === "NotAuthorizedException";
     }
   }
 
@@ -120,6 +138,11 @@ export async function proxy(request: NextRequest) {
 export const config = {
   matcher: [
     "/",
+    "/login",
+    "/signup",
+    "/confirm-signup",
+    "/forgot-password",
+    "/reset-password",
     "/single-screen/:path*",
     "/batch-screen/:path*",
     "/evaluate/:path*",

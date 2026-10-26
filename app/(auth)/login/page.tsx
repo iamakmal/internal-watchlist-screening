@@ -66,7 +66,7 @@ function LoginPageForm() {
         );
         return;
       }
-      router.push(redirectTo);
+      router.replace(redirectTo);
       router.refresh();
     } catch {
       setError("An error occurred while trying to sign in.");

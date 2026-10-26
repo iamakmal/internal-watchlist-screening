@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { redirect, usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   ClipboardCheck,
   FileSearch,
@@ -37,6 +37,7 @@ const navigation = [
 
 export default function Sidebar() {
   const { user, isAdmin } = useAuth();
+  const router = useRouter();
   const pathname = usePathname();
   const visibleNavigation = navigation.filter(
     (item) => !item.adminOnly || isAdmin,
@@ -47,7 +48,8 @@ export default function Sidebar() {
       method: "POST",
     });
     if (response.ok) {
-      redirect("/login");
+      router.replace("/login");
+      router.refresh();
     }
   }
 
